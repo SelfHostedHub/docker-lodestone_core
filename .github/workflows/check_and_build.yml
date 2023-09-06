@@ -13,35 +13,36 @@ jobs:
       MY_REPO: SelfHostedHub/docker-lodestone_core
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Set Local Git Identity
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "GitHub Actions"
+
+      - name: Install GitHub CLI
+        run: sudo apt update && sudo apt install -y gh
+
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Fetch Tags from Upstream
-        run: git ls-remote --tags https://github.com/${{ env.UPSTREAM_REPO }}.git > upstream_tags.txt
-
-      - name: Fetch Tags from Origin
-        run: git ls-remote --tags https://github.com/${{ env.MY_REPO }}.git > origin_tags.txt
-
-      - name: Check for New Tags
-        id: check_tag
+      - name: Fetch Latest Stable Release from Upstream
+        id: latest_release
         run: |
-          LATEST_UPSTREAM_TAG=$(awk '{print $2}' upstream_tags.txt | grep -v '{}' | sort -t '/' -k 3 -V | tail -n1 | sed 's/refs\/tags\///')
-          LATEST_MY_TAG=$(awk '{print $2}' origin_tags.txt | grep -v '{}' | sort -t '/' -k 3 -V | tail -n1 | sed 's/refs\/tags\///')
-          if [ "$LATEST_UPSTREAM_TAG" != "$LATEST_MY_TAG" ]; then
-            echo "::set-output name=new_tag::true"
-            echo "::set-output name=tag::${LATEST_UPSTREAM_TAG}"
-          else
-            echo "::set-output name=new_tag::false"
-          fi
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/${{ env.UPSTREAM_REPO }}/releases/latest | jq -r '.tag_name')
+          echo "::set-output name=tag::$LATEST_RELEASE"
+
+      - name: Fetch Latest Stable Release from My Repo
+        id: my_latest_release
+        run: |
+          MY_LATEST_RELEASE=$(curl -s https://api.github.com/repos/${{ env.MY_REPO }}/releases/latest | jq -r '.tag_name')
+          echo "::set-output name=tag::$MY_LATEST_RELEASE"
 
       - name: Check if Tag Already Exists
         id: check_existing_tag
         run: |
-          EXISTS=$(git tag | grep "${{ steps.check_tag.outputs.tag }}" || echo "")
-          if [[ -n "$EXISTS" ]]; then
-            echo "::set-output name=exists::true"
-          else
+          if [[ "${{ steps.latest_release.outputs.tag }}" != "${{ steps.my_latest_release.outputs.tag }}" ]]; then
             echo "::set-output name=exists::false"
+          else
+            echo "::set-output name=exists::true"
           fi
 
       - name: Update Dockerfile and Push Changes
