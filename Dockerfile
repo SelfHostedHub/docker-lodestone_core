@@ -4,10 +4,11 @@ ENV LODESTONE_CORE_VERSION=v0.4.3
 
 RUN apt-get update && apt-get install -y wget unzip
 
-RUN wget https://github.com/Lodestone-Team/lodestone_core/archive/refs/tags/${LODESTONE_CORE_VERSION}.zip \
-    && unzip ${LODESTONE_CORE_VERSION}.zip \
-    && mv lodestone_core-${LODESTONE_CORE_VERSION#v}/* /app \
-    && chmod +x /app
+RUN mkdir -p /app && \
+    wget https://github.com/Lodestone-Team/lodestone_core/archive/refs/tags/${LODESTONE_CORE_VERSION}.zip && \
+    unzip ${LODESTONE_CORE_VERSION}.zip && \
+    mv lodestone_core-${LODESTONE_CORE_VERSION#v}/* /app && \
+    chmod +x /app
 
 WORKDIR /app
 
