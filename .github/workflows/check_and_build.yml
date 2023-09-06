@@ -53,9 +53,9 @@ jobs:
         run: |
           NEW_TAG=${{ steps.check_tag.outputs.tag }}
           git checkout main
-          sed -i "s/ENV ROADMAPVERSION=.*/ENV ROADMAPVERSION=$NEW_TAG/" ./Dockerfile
+          sed -i "s/ENV LODESTONE_CORE_VERSION=.*/ENV LODESTONE_CORE_VERSION=$NEW_TAG/" ./Dockerfile
           git add ./Dockerfile
-          git commit -m "Update ROADMAPVERSION to $NEW_TAG"
+          git commit -m "Update LODESTONE_CORE_VERSION to $NEW_TAG"
           git push origin main
           git checkout -b updates/$NEW_TAG
           git push origin updates/$NEW_TAG
