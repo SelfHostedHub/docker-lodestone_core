@@ -36,10 +36,13 @@ jobs:
           MY_LATEST_RELEASE=$(curl -s https://api.github.com/repos/${{ env.MY_REPO }}/releases/latest | jq -r '.tag_name')
           echo "::set-output name=tag::$MY_LATEST_RELEASE"
 
-      - name: Check if Tag Already Exists
+      - name: Check if New Tag is Higher
         id: check_existing_tag
         run: |
-          if [[ "${{ steps.latest_release.outputs.tag }}" != "${{ steps.my_latest_release.outputs.tag }}" ]]; then
+          LATEST_MY_TAG=$(git describe --tags --always `git ls-remote --tags origin | awk '{print $2}' | grep -v '{}' | sort -t '/' -k 3 -V | tail -n1 | sed 's/refs\/tags\///'`)
+          NEW_TAG=${{ steps.check_tag.outputs.tag }}
+          HIGHER=$(echo -e "$LATEST_MY_TAG\n$NEW_TAG" | sort -V | tail -n 1)
+          if [[ "$HIGHER" == "$NEW_TAG" ]]; then
             echo "::set-output name=exists::false"
           else
             echo "::set-output name=exists::true"
