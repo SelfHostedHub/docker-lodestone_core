@@ -39,8 +39,8 @@ jobs:
       - name: Check if New Tag is Higher and Exists in My Repo
         id: check_existing_tag
         run: |
-          NEW_TAG=${{ steps.check_tag.outputs.tag }}
-          LATEST_MY_TAG=${{ steps.get_my_latest_tag.outputs.tag }} # Assuming you have a step that sets this
+          NEW_TAG=${{ steps.latest_release.outputs.tag }}
+          LATEST_MY_TAG=${{ steps.my_latest_release.outputs.tag }}
           HIGHER=$(echo -e "$LATEST_MY_TAG\n$NEW_TAG" | sort -V | tail -n 1)
           if [[ "$NEW_TAG" == "$LATEST_MY_TAG" ]]; then
             echo "::set-output name=exists::true"
