@@ -16,17 +16,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Add Upstream Remote
-        run: git remote add upstream https://github.com/${{ env.UPSTREAM_REPO }}.git || echo "Upstream already added."
-
       - name: Fetch Tags from Upstream
-        run: git fetch --tags upstream
+        run: git ls-remote --tags https://github.com/${{ env.UPSTREAM_REPO }}.git > upstream_tags.txt
+
+      - name: Fetch Tags from Origin
+        run: git ls-remote --tags https://github.com/${{ env.MY_REPO }}.git > origin_tags.txt
 
       - name: Check for New Tags
         id: check_tag
         run: |
-          LATEST_UPSTREAM_TAG=$(git ls-remote --tags upstream | awk '{print $2}' | grep -v '{}' | sort -t '/' -k 3 -V | tail -n1 | sed 's/refs\/tags\///')
-          LATEST_MY_TAG=$(git describe --tags --always)
+          LATEST_UPSTREAM_TAG=$(awk '{print $2}' upstream_tags.txt | grep -v '{}' | sort -t '/' -k 3 -V | tail -n1 | sed 's/refs\/tags\///')
+          LATEST_MY_TAG=$(awk '{print $2}' origin_tags.txt | grep -v '{}' | sort -t '/' -k 3 -V | tail -n1 | sed 's/refs\/tags\///')
           if [ "$LATEST_UPSTREAM_TAG" != "$LATEST_MY_TAG" ]; then
             echo "::set-output name=new_tag::true"
             echo "::set-output name=tag::${LATEST_UPSTREAM_TAG}"
