@@ -13,16 +13,16 @@ jobs:
       MY_REPO: SelfHostedHub/docker-lodestone_core
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+    
+      - name: Install GitHub CLI
+        run: sudo apt update && sudo apt install -y gh
+
       - name: Set Local Git Identity
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "GitHub Actions"
-
-      - name: Install GitHub CLI
-        run: sudo apt update && sudo apt install -y gh
-
-      - name: Checkout Code
-        uses: actions/checkout@v2
 
       - name: Fetch Latest Stable Release from Upstream
         id: latest_release
