@@ -1,6 +1,6 @@
 FROM rust as build
 
-ENV LODESTONE_CORE_VERSION=v0.4.4
+ENV LODESTONE_CORE_VERSION=v0.4.3
 
 RUN apt-get update && apt-get install -y wget unzip
 
